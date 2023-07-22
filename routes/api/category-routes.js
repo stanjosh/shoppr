@@ -7,8 +7,9 @@ const { Category, Product } = require('../../models');
 router.get('/', async (req, res) => {
   // find all categories
   // be sure to include its associated Products
-  let categories = await Category.findAll()
-  let products = await Product.findAll()
+  let categories = await Category.findAll({
+    include: { model: Product }
+  })
   if (categories) {
     res.json(categories)
   }
@@ -27,7 +28,7 @@ router.get('/:id', async (req, res) => {
     include: { model: Product }
   })
   
-  if (category) {
+  if (category.length > 0) {
     res.json(category)
   }
   else {
@@ -37,7 +38,7 @@ router.get('/:id', async (req, res) => {
 
 router.post('/', async (req, res) => {
   // create a new category
-  Category.create(req.body)
+  await Category.create(req.body)
     .then((category) => {
       res.status(200).json(category);
     })
@@ -45,8 +46,9 @@ router.post('/', async (req, res) => {
 
 router.put('/:id', async (req, res) => {
   // update a category by its `id` value
-  await Category.update(req.body, {where: {
-    id: req.params.id
+  await Category.update(req.body, {
+    where: {
+      id: req.params.id
     }})
     .then((category) => {
       res.status(200).json(category);
@@ -57,14 +59,16 @@ router.put('/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
   // delete a category by its `id` value
   try {
-    const categoryID = req.params.id // Delete http requests usually use a query and not a body
+    const categoryID = req.params.id
 
     await Category.destroy({
         where: {
             id: categoryID,
         }
     })
-    res.status(200).send("Successfuly deleted category")
+    .then((category) => {
+      res.status(200).send("Successfuly deleted category")
+    })
   } catch (err) {
       console.log(err)
       res.status(500).send("There was an error deleting this category")

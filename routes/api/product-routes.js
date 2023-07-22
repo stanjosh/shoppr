@@ -117,7 +117,9 @@ router.delete('/:id', async (req, res) => {
             id: productID,
         }
     })
-    res.status(200).send("Successfuly deleted product")
+    .then((product) => {
+      res.status(200).send("Successfuly deleted product")
+    })
   } catch (err) {
       console.log(err)
       res.status(500).send("There was an error deleting this product")

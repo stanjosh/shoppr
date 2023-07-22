@@ -16,10 +16,35 @@ router.get('/', async (req, res) => {
 
 });
 
-router.get('/:id', async (req, res) => {
+router.get('/:name', async (req, res) => {
   // find a single tag by its `id`
   // be sure to include its associated Product data
-  let tag = await Tag.findByPk(req.params.id);
+  let tag = await Tag.findAll(
+    {
+      where: {
+        tag_name: req.params.name
+      },
+      include: { 
+        model: Product 
+      } 
+  });
+  if (tag) {
+    res.json(tag)
+  }
+  else {
+    res.status(404).send('Tag not found')
+  }
+
+});
+
+router.get('/id/:id', async (req, res) => {
+  // find a single tag by its `id`
+  // be sure to include its associated Product data
+  let tag = await Tag.findByPk(req.params.id, {
+    include: { 
+      model: Product 
+    } 
+  });
   if (tag) {
     res.json(tag)
   }
@@ -56,7 +81,9 @@ router.delete('/:id', async (req, res) => {
             id: tagID,
         }
     })
-    res.status(200).send("Successfuly deleted tag")
+    .then((tag) => {
+      res.status(200).send("Successfuly deleted tag")
+    })
   } catch (err) {
       console.log(err)
       res.status(500).send("There was an error deleting this tag")
