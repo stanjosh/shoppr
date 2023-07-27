@@ -11,28 +11,25 @@ router.get('/', async (req, res) => {
     include: { model: Product }
   })
   if (categories) {
-    res.json(categories)
+    return res.json(categories)
   }
   else {
-    res.status(404).send('No categories found')
+    return res.status(404).send('No categories found')
   }
 });
 
 router.get('/:id', async (req, res) => {
   // find one category by its `id` value
   // be sure to include its associated Products
-  let category = await Category.findAll({
-    where: {
-      id: req.params.id
-    },
+  let category = await Category.findByPk(req.params.id, {
     include: { model: Product }
   })
   
   if (category.length > 0) {
-    res.json(category)
+    return res.json(category)
   }
   else {
-    res.status(404).send('Category not found')
+    req.params.idres.status(404).send('Category not found')
   }
 });
 
@@ -40,8 +37,13 @@ router.post('/', async (req, res) => {
   // create a new category
   await Category.create(req.body)
     .then((category) => {
-      res.status(200).json(category);
+      return res.status(200).json(category);
+      
     })
+    .catch((err) => {
+      console.log(err)
+      return res.status(500).send("There was an error creating this category")
+    });
 });
 
 router.put('/:id', async (req, res) => {
@@ -51,28 +53,28 @@ router.put('/:id', async (req, res) => {
       id: req.params.id
     }})
     .then((category) => {
-      res.status(200).json(category);
-    }
-  )
+      return res.status(200).json(category);
+    })
+    .catch((err) => {
+      console.log(err)
+      return res.status(500).send("There was an error updating this category")
+    });
 });
 
 router.delete('/:id', async (req, res) => {
   // delete a category by its `id` value
-  try {
-    const categoryID = req.params.id
-
-    await Category.destroy({
+  await Category.destroy({
         where: {
-            id: categoryID,
+            id: req.params.id
         }
     })
     .then((category) => {
-      res.status(200).send("Successfuly deleted category")
+      return res.status(200).send("Successfuly deleted category")
     })
-  } catch (err) {
+    .catch((err) => {
       console.log(err)
-      res.status(500).send("There was an error deleting this category")
-  }
+      return res.status(500).send("There was an error deleting this category")
+  });
 });
 
 module.exports = router;
